@@ -1,0 +1,127 @@
+<html>
+<head>
+
+	<link rel="stylesheet" href="css/leaflet.css" />
+	<script src="js/leaflet.js"></script>
+	<script src="data/cheiasrapidas.geojson"></script>
+	<script src="data/galgamentos.geojson"></script>
+	<script src="data/instavertentes.geojson"></script>
+	<script src="data/inundacaoestuarina.geojson"></script>
+	<script src="data/recuoarribas.geojson"></script>
+	<script src="data/equipamentos.geojson"></script>
+	
+	<style>
+		#map { height: 100%; }
+	</style>
+
+</head>
+
+<body>
+
+	<div id="map"></div>
+	<script>
+		//atribuição das coordenadas onde o nosso mapa vai 'estar' quando abrimos o site
+	var map = L.map('map').setView([38.76127394183039, -9.16081872685115], 10);
+	
+		//aqui serve para 'usarmos' o osm no nosso site
+	var OSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+	
+		//este serve para atribuir uma "skin" ao nosso mapa do osm
+	var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+	maxZoom: 17,
+	attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+	}).addTo(map);
+	
+	
+	function getColor(d) {
+		return d == "Elevada" ? '#ff0000' :
+           d == "Moderada"  ? '#ff7f00' :
+           d == "Reduzida"  ? '#ffff00' :
+                      '#FFEDA0';
+		}		
+		function cheiasrapidasStyle(feature) {
+		return {
+			fillColor: getColor(feature.properties.Suscet),
+			weight: 0,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7
+			};
+		}
+
+	var cheiasrapidasLayer = new L.geoJSON(cheiasrapidasData,{
+		style: cheiasrapidasStyle,
+	}).addTo(map);
+	
+	var galgamentosLayer = new L.geoJSON(galgamentosData,{
+		//style: galgamentosStyle,
+	}).addTo(map);
+	
+	var instavertentesLayer = new L.geoJSON(instavertentesData,{
+		//style: instavertentesStyle,
+	}).addTo(map);
+	
+	var inundacaoestuarinaLayer = new L.geoJSON(inundacaoestuarinaData,{
+		//style: inundacaoestuarinaStyle,
+	}).addTo(map);
+	
+	var recuoarribasLayer = new L.geoJSON(recuoarribasData,{
+		//style: recuoarribasStyle,
+	}).addTo(map);
+		
+		//criação de um icon personalizado
+	var meuIcon = L.icon({
+        iconUrl: 'images/school-svgrepo-com.svg', // path to your SVG file
+        iconSize: [32, 32],                     // size of the icon (width, height)
+        iconAnchor: [16, 32],                   // anchor point (usually bottom-center)
+        popupAnchor: [0, -32],                  // popup position relative to the icon
+        shadowSize: [0, 0]                      // if you want a shadow, you can customize here (default 0,0)
+      });
+	  
+	function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+    layer.bindPopup(JSON.stringify(feature.properties));
+		} 
+
+	
+	var equipamentosLayer = new L.geoJSON(equipamentosData,{
+		onEachFeature: onEachFeature,
+		pointToLayer: function (feature, latlng) {
+		return L.marker(latlng, { icon: meuIcon });
+		}
+	}).addTo(map);
+	
+	var wmsLayer = L.tileLayer.wms('https://geo2.dgterritorio.gov.pt/geoserver/caop_continente/wms?', {
+	layers: 'cont_municipios',
+	opacity: 0.5
+	}).addTo(map);
+	
+	var baseMaps = {
+    "OpenStreetMap": OSM,
+    "Topo - Imagens": OpenTopoMap
+	};
+
+	var overlayMaps = {
+    "Cheias rápidas": cheiasrapidasLayer,
+	"Galgamentos": galgamentosLayer,
+	"Instabilidade de Vertentes": instavertentesLayer,
+	"Inundações estuarinas": inundacaoestuarinaLayer,
+	"Recuo arribas": recuoarribasLayer,
+	"Equipamentos": equipamentosLayer,
+	"Limites administrativos": wmsLayer
+	};
+	
+	var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+	var escala = L.control.scale().addTo(map);
+	
+	</script>
+
+
+</body>
+</html>
+
+ <! -- #o "map" em ID dps vai ligar ao "#map" da linha 8 por terem o mesmo nome, na linha 17 a mesma coisa -->
